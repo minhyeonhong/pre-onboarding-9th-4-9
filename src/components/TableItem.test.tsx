@@ -1,6 +1,5 @@
 
 import { render, screen } from '@testing-library/react';
-import { useState } from 'react';
 import instance from '../apis/instance';
 import { TMockData, TO_DAY } from '../types/mockDataTypes';
 import TableItem from './TableItem';

@@ -22,7 +22,7 @@ const STHeaderWrap = styled.div`
   width: 100%;
   height: 6%;
   background-color: #ffff;
-  box-shadow: 1px 0px 6px 3px;
+  box-shadow: 1px 0px 6px 3px gray;
 `;
 const StItemWrap = styled.div`
   margin-left: 0.5%;

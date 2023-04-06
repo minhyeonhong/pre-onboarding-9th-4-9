@@ -21,7 +21,7 @@ const Paging = ({
 
   return (
     <StPageBtnWrap>
-      {filters.currentPageNumber - PAGE_LENGTH >= 0 && (
+      {filters.currentPageNumber - PAGE_LENGTH > 0 && (
         <Button
           text='<'
           onClick={() => {

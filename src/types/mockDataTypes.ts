@@ -2,7 +2,7 @@ export const TO_DAY = '2023-03-08';
 
 export const ONE_PAGE_ITEM_LENGTH = 50;
 
-export const PAGE_LENGTH = 2;
+export const PAGE_LENGTH = 3;
 
 export type TMockData = {
   id: number;
