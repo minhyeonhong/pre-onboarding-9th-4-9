@@ -9,7 +9,6 @@ import {
 } from '../types/mockDataTypes';
 
 const useFilter = (toDayMockData: TMockData[] = [], isLoading: boolean) => {
-  const [originDatas, setOriginDatas] = useState<TMockData[]>([]);
   const [orders, setOrders] = useState<any>([]);
   const [pagingItems, setPaingItems] = useState<TPagingItems>({
     pages: [],
@@ -50,33 +49,37 @@ const useFilter = (toDayMockData: TMockData[] = [], isLoading: boolean) => {
     if (isLoading) return;
     setOrders(getPageData(toDayMockData));
     setPaingItems(getPaging(toDayMockData));
-    setOriginDatas(toDayMockData);
   }, [toDayMockData]);
 
   useEffect(() => {
     const filteringData =
       filters.status === 'all'
-        ? originDatas.filter((toDayItem: TMockData) =>
-          toDayItem.customer_name.toUpperCase().includes(filters.customer_name.toUpperCase())
+        ? toDayMockData.filter((toDayItem: TMockData) =>
+          toDayItem.customer_name
+            .toUpperCase()
+            .includes(filters.customer_name.toUpperCase())
         )
-        : originDatas
+        : toDayMockData
           .filter(
             (toDayItem: TMockData) =>
               toDayItem.status.toString() === filters.status
           )
           .filter((statusItem: TMockData) =>
-            statusItem.customer_name.toUpperCase().includes(filters.customer_name.toUpperCase())
+            statusItem.customer_name
+              .toUpperCase()
+              .includes(filters.customer_name.toUpperCase())
           );
 
     setPaingItems(getPaging(filteringData));
 
-    const pageData = getPageData(filteringData);
+    const pageData = filteringData.length < ONE_PAGE_ITEM_LENGTH ? filteringData : getPageData(filteringData);
 
     const orderDatas = _.orderBy(
       pageData,
       [filters.sortKey],
       [filters.sortValue]
     );
+
     setOrders(orderDatas);
   }, [filters]);
 
