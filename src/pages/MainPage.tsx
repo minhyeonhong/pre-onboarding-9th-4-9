@@ -1,25 +1,31 @@
 import styled from 'styled-components';
+
 import Paging from '../components/Paging';
 import Search from '../components/Search';
 import TableItem from '../components/TableItem';
 import useFilter from '../hooks/useFilter';
 import useGetOrders from '../hooks/useGetOrders';
 import { ONE_PAGE_ITEM_LENGTH, TMockData } from '../types/mockDataTypes';
+import { useSearchParams } from 'react-router-dom';
 
 const MainPage = () => {
   const { toDayMockData, isLoading } = useGetOrders();
 
-  const [orders, pagingItems, filters, setFilters] = useFilter(
+  const [orders, pagingItems] = useFilter(
     toDayMockData,
     isLoading
   );
+
+  const [params, setParams] = useSearchParams();
+
+  const currentPageNumber = Number(params.get('currentPageNumber') || 1);
 
   const { pages, totalPageCount } = pagingItems;
 
   return (
     <StMainPageWrap>
       <StSearchBox>
-        <Search filters={filters} setFilters={setFilters} />
+        <Search />
       </StSearchBox>
 
       <StTableWrap>
@@ -38,7 +44,7 @@ const MainPage = () => {
             const itemNumber =
               index +
               1 +
-              (filters.currentPageNumber - 1) * ONE_PAGE_ITEM_LENGTH;
+              (currentPageNumber - 1) * ONE_PAGE_ITEM_LENGTH;
             return (
               <TableItem key={item.id} item={item} itemNumber={itemNumber} />
             );
@@ -47,8 +53,6 @@ const MainPage = () => {
         <Paging
           pages={pages}
           totalPageCount={totalPageCount}
-          filters={filters}
-          setFilters={setFilters}
         />
       </StTableWrap>
     </StMainPageWrap>

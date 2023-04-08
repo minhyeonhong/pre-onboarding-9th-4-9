@@ -1,22 +1,24 @@
 import { ChangeEvent, FormEvent } from 'react';
 import styled from 'styled-components';
 
-import { TFilter } from '../types/mockDataTypes';
 import Button from './Button';
+import { useSearchParams } from 'react-router-dom';
 
-interface IProps {
-  filters: TFilter;
-  setFilters: (p: TFilter) => void;
-}
 
-const Search = ({ filters, setFilters }: IProps) => {
+const Search = () => {
+
+  const [params, setParams] = useSearchParams();
+
+  const sortKey = params.get('sortKey') || 'id';
+  const sortValue = params.get('sortValue') || 'asc';
+
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const formData = event.target as HTMLFormElement;
     const inputValue = (formData[0] as HTMLInputElement).value;
-
-    setFilters({ ...filters, customer_name: inputValue });
+    params.set('customer_name', inputValue);
+    setParams(params);
   };
 
   const setStatus = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -25,15 +27,14 @@ const Search = ({ filters, setFilters }: IProps) => {
         ? 'all'
         : event.target.value;
 
-    setFilters({ ...filters, status: selectValue });
+    params.set('status', selectValue);
+    setParams(params);
   };
 
   const setSort = (sortKey: 'id' | 'transaction_time') => {
-    setFilters({
-      ...filters,
-      sortKey,
-      sortValue: filters.sortValue === 'asc' ? 'desc' : 'asc',
-    });
+    params.set('sortKey', sortKey);
+    params.set('sortValue', sortValue === 'asc' ? 'desc' : 'asc');
+    setParams(params);
   };
 
   return (
@@ -43,7 +44,7 @@ const Search = ({ filters, setFilters }: IProps) => {
           text='주문번호'
           onClick={() => setSort('id')}
           isOn={
-            filters.sortKey === 'id' && filters.sortValue === 'desc'
+            sortKey === 'id' && sortValue === 'desc'
               ? true
               : false
           }
@@ -52,8 +53,8 @@ const Search = ({ filters, setFilters }: IProps) => {
           text='거래일&거래시간'
           onClick={() => setSort('transaction_time')}
           isOn={
-            filters.sortKey === 'transaction_time' &&
-              filters.sortValue === 'desc'
+            sortKey === 'transaction_time' &&
+              sortValue === 'desc'
               ? true
               : false
           }
