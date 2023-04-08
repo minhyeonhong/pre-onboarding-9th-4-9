@@ -1,73 +1,62 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 
-import { PAGE_LENGTH, TFilter } from '../types/mockDataTypes';
+import { PAGE_LENGTH } from '../types/mockDataTypes';
 import Button from './Button';
+import { useSearchParams } from 'react-router-dom';
 
 interface IPagingProps {
   pages: number[];
   totalPageCount: number;
-  filters: TFilter;
-  setFilters: (p: TFilter) => void;
 }
 
 const Paging = ({
   pages = [],
   totalPageCount = 0,
-  filters,
-  setFilters,
 }: IPagingProps) => {
   const [pageLength, setPageLength] = useState<number>(PAGE_LENGTH);
 
+  const [params, setParams] = useSearchParams();
+
+  const currentPageNumber = Number(params.get('currentPageNumber') || 1);
+
   return (
     <StPageBtnWrap>
-      {filters.currentPageNumber - PAGE_LENGTH > 0 && (
+      {currentPageNumber > 1 && (
         <Button
           text='<'
           onClick={() => {
-            setPageLength(pageLength - PAGE_LENGTH);
-            setFilters({
-              ...filters,
-              currentPageNumber: filters.currentPageNumber - PAGE_LENGTH,
-            });
+            setPageLength(pageLength - 1);
+            params.set('currentPageNumber', (currentPageNumber - 1).toString());
+            setParams(params);
           }}
         />
       )}
-      {totalPageCount < PAGE_LENGTH
-        ? pages.map((page: number) => (
-          <Button
-            key={page}
-            text={page}
-            onClick={() =>
-              setFilters({ ...filters, currentPageNumber: page })
-            }
-            isOn={filters.currentPageNumber === page}
-          />
-        ))
-        : pages
+      {
+        pages
           .filter(
-            (page: number) =>
-              page <= pageLength && page > pageLength - PAGE_LENGTH
+            (page: number, idx: number) =>
+              idx >= (currentPageNumber - 1) && idx < (currentPageNumber - 1) + PAGE_LENGTH
           )
           .map((page: number) => (
             <Button
               key={page}
               text={page}
-              onClick={() =>
-                setFilters({ ...filters, currentPageNumber: page })
-              }
-              isOn={filters.currentPageNumber === page}
+              onClick={() => {
+                params.set('currentPageNumber', page.toString());
+                setParams(params);
+              }}
+              isOn={currentPageNumber === page}
             />
-          ))}
-      {pageLength < totalPageCount && (
+          ))
+      }
+      {totalPageCount - currentPageNumber >= PAGE_LENGTH && (
         <Button
           text='>'
           onClick={() => {
-            setPageLength(pageLength + PAGE_LENGTH);
-            setFilters({
-              ...filters,
-              currentPageNumber: filters.currentPageNumber + PAGE_LENGTH,
-            });
+            setPageLength(pageLength + 1);
+            params.set('currentPageNumber', (currentPageNumber + 1).toString());
+            setParams(params);
           }}
         />
       )}

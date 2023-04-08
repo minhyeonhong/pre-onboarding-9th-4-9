@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react';
 
 import {
   ONE_PAGE_ITEM_LENGTH,
-  TFilter,
   TMockData,
   TPagingItems,
 } from '../types/mockDataTypes';
+import { useSearchParams } from 'react-router-dom';
 
 const useFilter = (toDayMockData: TMockData[] = [], isLoading: boolean) => {
   const [orders, setOrders] = useState<any>([]);
@@ -14,19 +14,15 @@ const useFilter = (toDayMockData: TMockData[] = [], isLoading: boolean) => {
     pages: [],
     totalPageCount: 0,
   });
-  const [filters, setFilters] = useState<TFilter>({
-    currentPageNumber: 1,
-    sortKey: 'id',
-    sortValue: 'asc',
-    status: 'all',
-    customer_name: '',
-  });
+  const [params, setParams] = useSearchParams();
+  const currentPageNumber = Number(params.get('currentPageNumber') || 1);
+
 
   const getPageData = (data: TMockData[] = []): TMockData[] => {
     return data.filter(
       (item: TMockData, index: number) =>
-        index >= (filters.currentPageNumber - 1) * ONE_PAGE_ITEM_LENGTH &&
-        index < filters.currentPageNumber * ONE_PAGE_ITEM_LENGTH
+        index >= (currentPageNumber - 1) * ONE_PAGE_ITEM_LENGTH &&
+        index < currentPageNumber * ONE_PAGE_ITEM_LENGTH
     );
   };
 
@@ -46,6 +42,17 @@ const useFilter = (toDayMockData: TMockData[] = [], isLoading: boolean) => {
   };
 
   useEffect(() => {
+    if (!params.get('currentPageNumber')) {
+      params.set('currentPageNumber', '1');
+    }
+    params.set('sortKey', 'id');
+    params.set('sortValue', 'asc');
+    params.set('status', 'all');
+    params.set('customer_name', '');
+    setParams(params);
+  }, []);
+
+  useEffect(() => {
     if (isLoading) return;
     setOrders(getPageData(toDayMockData));
     setPaingItems(getPaging(toDayMockData));
@@ -53,37 +60,40 @@ const useFilter = (toDayMockData: TMockData[] = [], isLoading: boolean) => {
 
   useEffect(() => {
     const filteringData =
-      filters.status === 'all'
+      params.get('status') === 'all'
         ? toDayMockData.filter((toDayItem: TMockData) =>
           toDayItem.customer_name
             .toUpperCase()
-            .includes(filters.customer_name.toUpperCase())
+            .includes((params.get('customer_name') || '').toUpperCase())
         )
         : toDayMockData
           .filter(
             (toDayItem: TMockData) =>
-              toDayItem.status.toString() === filters.status
+              toDayItem.status.toString() === params.get('status')
           )
           .filter((statusItem: TMockData) =>
             statusItem.customer_name
               .toUpperCase()
-              .includes(filters.customer_name.toUpperCase())
+              .includes((params.get('customer_name') || '').toUpperCase())
           );
 
     setPaingItems(getPaging(filteringData));
 
-    const pageData = filteringData.length < ONE_PAGE_ITEM_LENGTH ? filteringData : getPageData(filteringData);
+    const pageData =
+      filteringData.length < ONE_PAGE_ITEM_LENGTH
+        ? filteringData
+        : getPageData(filteringData);
 
     const orderDatas = _.orderBy(
       pageData,
-      [filters.sortKey],
-      [filters.sortValue]
+      [(params.get('sortKey') || 'id')],
+      [(params.get('sortValue') === 'desc' ? 'desc' : 'asc')]
     );
 
     setOrders(orderDatas);
-  }, [filters]);
+  }, [params]);
 
-  return [orders, pagingItems, filters, setFilters];
+  return [orders, pagingItems];
 };
 
 export default useFilter;
